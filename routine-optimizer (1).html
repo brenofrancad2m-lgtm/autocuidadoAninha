@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rotina da Aninha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TOKENS DE DESIGN  (dark-first, alterna para claro pelo SO)
+   ============================================================ */
+:root{
+  --bg:#0d1017;
+  --surface:#161b26;
+  --surface-2:#1d2432;
+  --line:#28303f;
+  --text:#e8ecf4;
+  --muted:#8b94a7;
+  --accent:#6366f1;
+  --accent-soft:rgba(99,102,241,.15);
+  /* cores por tipo de evento */
+  --trabalho:#4c7df0;
+  --saude:#3fc98c;
+  --pessoal:#a855f7;
+  --deslocamento:#6b7280;
+  --sono:#111827;
+  /* semânticas */
+  --ok:#3fc98c;
+  --warn:#f2c14e;
+  --crit:#ef5a5a;
+  --radius:16px;
+  --shadow:0 8px 24px rgba(0,0,0,.4);
+}
+@media (prefers-color-scheme: light){
+  :root{
+    --bg:#f5f7fb;
+    --surface:#ffffff;
+    --surface-2:#eef2f8;
+    --line:#e3e8f0;
+    --text:#1a2030;
+    --muted:#68718a;
+    --accent-soft:rgba(99,102,241,.1);
+    --sono:#374151;
+    --shadow:0 6px 20px rgba(26,32,48,.08);
+  }
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);color:var(--text);
+  line-height:1.5;padding-bottom:64px;
+}
+/* ---------- HEADER ---------- */
+header{
+  position:sticky;top:0;z-index:100;
+  background:color-mix(in srgb, var(--bg) 85%, transparent);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);padding:14px 18px;
+}
+.brand{display:flex;align-items:center;gap:10px}
+.brand .logo{
+  width:40px;height:40px;border-radius:50%;flex-shrink:0;
+  background-size:cover;background-position:center;
+  border:2px solid var(--accent);
+  box-shadow:0 0 0 3px var(--accent-soft);
+}
+.brand h1{font-size:1.05rem;font-weight:700;letter-spacing:-.01em}
+.brand p{font-size:.72rem;color:var(--muted)}
+.brand p .heart{display:inline-block;animation:beat 1.8s ease-in-out infinite;filter:saturate(1.1)}
+@keyframes beat{0%,100%{transform:scale(1)}45%{transform:scale(1.22)}60%{transform:scale(.96)}}
+.day-progress{margin-top:11px;height:4px;border-radius:99px;background:var(--line);overflow:hidden}
+.day-progress span{display:block;height:100%;width:0;border-radius:99px;
+  background:linear-gradient(90deg,var(--accent),var(--saude));transition:width .5s ease}
+/* ---------- LAYOUT ---------- */
+main{max-width:640px;margin:0 auto;padding:20px 18px;display:flex;flex-direction:column;gap:22px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card-pad{padding:18px}
+.sec-title{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;
+  color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.sec-title svg{width:15px;height:15px;stroke:var(--muted);stroke-width:2;fill:none}
+/* ---------- CAMPOS ---------- */
+label.fld{display:block;font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:5px}
+input,select{
+  width:100%;padding:11px 13px;border-radius:11px;border:1px solid var(--line);
+  background:var(--surface-2);color:var(--text);font-family:inherit;font-size:.9rem;
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b94a7' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid-2-plus{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
+.field{margin-bottom:11px}
+/* ---------- BOTÕES ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  padding:12px 16px;border-radius:12px;border:none;cursor:pointer;
+  font-family:inherit;font-size:.88rem;font-weight:600;width:100%;
+  transition:transform .15s ease, filter .2s ease, background .2s ease;
+}
+.btn:active{transform:scale(.98)}
+.btn svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-ghost{background:var(--surface-2);color:var(--text);border:1px solid var(--line)}
+.btn-ghost:hover{border-color:var(--accent)}
+.btn-accent{background:linear-gradient(135deg,var(--accent),#8b5cf6);color:#fff;padding:14px;font-size:.95rem}
+.btn-accent:hover{filter:brightness(1.08)}
+.btn-sm{width:auto;padding:11px 15px}
+/* ---------- LISTA DE EVENTOS ---------- */
+.evt-list{display:flex;flex-direction:column;gap:9px;margin-top:14px}
+.evt{
+  display:flex;align-items:center;gap:12px;padding:12px 13px;border-radius:12px;
+  background:var(--surface-2);border:1px solid var(--line);
+  border-left:4px solid var(--c);animation:slideIn .28s ease;
+}
+@keyframes slideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.evt .dot{width:9px;height:9px;border-radius:50%;background:var(--c);flex-shrink:0}
+.evt .info{flex:1;min-width:0}
+.evt .info .n{font-size:.9rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.evt .info .t{font-size:.74rem;color:var(--muted)}
+.evt .prio{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  padding:2px 7px;border-radius:6px;flex-shrink:0}
+.prio-alta{background:color-mix(in srgb,var(--crit) 18%,transparent);color:var(--crit)}
+.prio-media{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+.prio-baixa{background:color-mix(in srgb,var(--muted) 22%,transparent);color:var(--muted)}
+.evt .del{background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;
+  border-radius:6px;display:grid;place-items:center;transition:color .2s,background .2s}
+.evt .del:hover{color:var(--crit);background:color-mix(in srgb,var(--crit) 12%,transparent)}
+.evt .del svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none}
+.empty{text-align:center;color:var(--muted);font-size:.82rem;padding:22px 10px}
+/* ---------- TIMELINE ---------- */
+.timeline{display:flex;flex-direction:column;gap:3px}
+.tl-row{display:flex;align-items:stretch;gap:10px;min-height:34px}
+.tl-time{font-size:.68rem;color:var(--muted);width:42px;flex-shrink:0;padding-top:3px;font-variant-numeric:tabular-nums}
+.tl-block{
+  flex:1;border-radius:9px;padding:7px 11px;display:flex;align-items:center;justify-content:space-between;
+  background:var(--c);color:#fff;font-size:.8rem;font-weight:600;
+  box-shadow:0 2px 8px color-mix(in srgb,var(--c) 40%,transparent);
+}
+.tl-block .dur{font-size:.68rem;opacity:.85;font-weight:500}
+.tl-gap{flex:1;border-radius:9px;border:1px dashed var(--line);
+  display:flex;align-items:center;padding:0 11px;font-size:.72rem;color:var(--muted)}
+/* ---------- SCORE ---------- */
+.score-wrap{display:flex;align-items:center;gap:16px}
+.score-ring{position:relative;width:88px;height:88px;flex-shrink:0}
+.score-ring svg{transform:rotate(-90deg)}
+.score-ring .num{position:absolute;inset:0;display:grid;place-items:center;
+  font-size:1.5rem;font-weight:800}
+.score-info{flex:1}
+.score-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:99px;
+  font-size:.78rem;font-weight:700;margin-bottom:5px}
+.score-info p{font-size:.8rem;color:var(--muted)}
+.badge-ok{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.badge-warn{background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn)}
+.badge-crit{background:color-mix(in srgb,var(--crit) 16%,transparent);color:var(--crit)}
+/* ---------- MÉTRICAS ---------- */
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:15px}
+.metric{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px 10px;text-align:center}
+.metric .mv{font-size:1.1rem;font-weight:800}
+.metric .ml{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+/* ---------- HEATMAP ---------- */
+.heat{display:flex;flex-direction:column;gap:11px;margin-top:4px}
+.heat-row{display:flex;flex-direction:column;gap:5px}
+.heat-top{display:flex;justify-content:space-between;align-items:center}
+.heat-name{font-size:.82rem;font-weight:600}
+.heat-tag{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.heat-bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.heat-bar span{display:block;height:100%;border-radius:99px;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.heat-alto .heat-tag{color:var(--crit)} .heat-alto .heat-bar span{background:var(--crit)}
+.heat-medio .heat-tag{color:var(--warn)} .heat-medio .heat-bar span{background:var(--warn)}
+.heat-baixo .heat-tag{color:var(--ok)} .heat-baixo .heat-bar span{background:var(--ok)}
+.heat-desc{font-size:.72rem;color:var(--muted)}
+/* ---------- RECOMENDAÇÕES ---------- */
+.recs{display:flex;flex-direction:column;gap:9px}
+.rec{display:flex;gap:11px;padding:12px 13px;border-radius:12px;background:var(--surface-2);
+  border:1px solid var(--line);border-left:4px solid var(--c,var(--accent));animation:slideIn .3s ease}
+.rec .ricon{flex-shrink:0;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;
+  background:color-mix(in srgb,var(--c) 18%,transparent)}
+.rec .ricon svg{width:13px;height:13px;stroke:var(--c);stroke-width:2.5;fill:none}
+.rec .rtxt{font-size:.84rem}
+.rec-crit{--c:var(--crit)} .rec-warn{--c:var(--warn)} .rec-ok{--c:var(--ok)} .rec-info{--c:var(--accent)}
+/* ---------- TOAST ---------- */
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,80px);z-index:200;
+  background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);
+  padding:11px 18px;border-radius:12px;font-size:.85rem;font-weight:600;
+  opacity:0;transition:transform .3s ease, opacity .3s ease;pointer-events:none;
+  display:flex;align-items:center;gap:8px;max-width:90vw}
+#toast.show{transform:translate(-50%,0);opacity:1}
+#toast svg{width:16px;height:16px;stroke:var(--ok);stroke-width:2.5;fill:none}
+.hidden{display:none !important}
+.fade-in{animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media (min-width:560px){ .brand h1{font-size:1.15rem} }
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header>
+  <div class="brand">
+    <div class="logo" style="background-image:url('data:image/jpeg;base64,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')" role="img" aria-label="Foto de perfil"></div>
+    <div>
+      <h1>Rotina da Aninha</h1>
+      <p>Você merece se cuidar, tenha um dia abençoadinho <span class="heart">&#10084;&#65039;</span></p>
+    </div>
+  </div>
+  <div class="day-progress"><span id="dayBar"></span></div>
+</header>
+
+<main>
+
+  <!-- ============ SELETOR DE DIA + ACORDAR ============ -->
+  <section class="card card-pad">
+    <div class="sec-title">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+      Dia
+    </div>
+    <div class="grid-2">
+      <div>
+        <label class="fld" for="dateInput">Data</label>
+        <input type="date" id="dateInput">
+      </div>
+      <div>
+        <label class="fld" for="wakeInput">Acordar às</label>
+        <input type="time" id="wakeInput" value="05:30">
+      </div>
+    </div>
+    <div class="grid-2" style="margin-top:10px">
+      <button class="btn btn-ghost" id="loadBtn">
+        <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-9-9 9 9 0 016.7 3M21 3v6h-6"/></svg>
+        Carregar dia
+      </button>
+      <button class="btn btn-primary" id="saveBtn">
+        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+        Salvar dia
+      </button>
+    </div>
+  </section>
+
+  <!-- ============ ADICIONAR EVENTO ============ -->
+  <section class="card card-pad">
+    <div class="sec-title">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      Adicionar à rotina
+    </div>
+    <div class="field">
+      <label class="fld" for="evName">Atividade</label>
+      <input type="text" id="evName" placeholder="Ex: Trabalho, Acupuntura, Curso...">
+    </div>
+    <div class="grid-2 field">
+      <div>
+        <label class="fld" for="evStart">Início</label>
+        <input type="time" id="evStart" value="09:00">
+      </div>
+      <div>
+        <label class="fld" for="evEnd">Fim</label>
+        <input type="time" id="evEnd" value="18:00">
+      </div>
+    </div>
+    <div class="grid-2 field">
+      <div>
+        <label class="fld" for="evType">Tipo</label>
+        <select id="evType">
+          <option value="trabalho">Trabalho</option>
+          <option value="saude">Saúde</option>
+          <option value="deslocamento">Deslocamento</option>
+          <option value="pessoal">Pessoal</option>
+          <option value="sono">Sono</option>
+        </select>
+      </div>
+      <div>
+        <label class="fld" for="evPrio">Prioridade</label>
+        <select id="evPrio">
+          <option value="baixa">Baixa</option>
+          <option value="media" selected>Média</option>
+          <option value="alta">Alta</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="addBtn">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      Adicionar à rotina
+    </button>
+
+    <div class="evt-list" id="evtList"></div>
+  </section>
+
+  <!-- ============ TIMELINE ============ -->
+  <section class="card card-pad" id="timelineCard">
+    <div class="sec-title">
+      <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+      Timeline do dia
+    </div>
+    <div class="timeline" id="timeline"></div>
+  </section>
+
+  <!-- ============ BOTÃO ANALISAR ============ -->
+  <button class="btn btn-accent" id="analyzeBtn">
+    <svg viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+    Gerar análise do dia
+  </button>
+
+  <!-- ============ RESULTADO ============ -->
+  <div id="result" class="hidden" style="display:flex;flex-direction:column;gap:22px">
+
+    <!-- Score -->
+    <section class="card card-pad">
+      <div class="sec-title">
+        <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/><path d="M12 6v6l4 2"/></svg>
+        Score do dia
+      </div>
+      <div class="score-wrap">
+        <div class="score-ring">
+          <svg width="88" height="88">
+            <circle cx="44" cy="44" r="38" fill="none" stroke="var(--line)" stroke-width="8"/>
+            <circle id="scoreArc" cx="44" cy="44" r="38" fill="none" stroke="var(--ok)" stroke-width="8"
+              stroke-linecap="round" stroke-dasharray="238.76" stroke-dashoffset="238.76"
+              style="transition:stroke-dashoffset .9s ease, stroke .4s ease"/>
+          </svg>
+          <div class="num" id="scoreNum">0</div>
+        </div>
+        <div class="score-info">
+          <span class="score-badge" id="scoreBadge">--</span>
+          <p id="scoreDesc">Adicione eventos e gere a análise.</p>
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="mv" id="mSleep">--</div><div class="ml">Sono</div></div>
+        <div class="metric"><div class="mv" id="mLoad">--</div><div class="ml">Carga</div></div>
+        <div class="metric"><div class="mv" id="mFree">--</div><div class="ml">Livre</div></div>
+      </div>
+    </section>
+
+    <!-- Recomendações -->
+    <section class="card card-pad">
+      <div class="sec-title">
+        <svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 00-4 12.7c.6.5 1 1.3 1 2.1h6c0-.8.4-1.6 1-2.1A7 7 0 0012 2z"/></svg>
+        Ações recomendadas
+      </div>
+      <div class="recs" id="recs"></div>
+    </section>
+
+    <!-- Heatmap -->
+    <section class="card card-pad">
+      <div class="sec-title">
+        <svg viewBox="0 0 24 24"><path d="M12 3c2 4-3 5-3 9a3 3 0 006 0c0-1 2 1 2 3a5 5 0 01-10 0c0-6 5-7 5-12z"/></svg>
+        Onde o tempo escapa
+      </div>
+      <div class="heat" id="heat"></div>
+    </section>
+
+  </div>
+
+</main>
+
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   ROUTINE OPTIMIZER — JS puro
+   Estrutura no localStorage:
+   { "AAAA-MM-DD": { wake:"05:30", eventos:[ {id,name,start,end,type,prio} ] } }
+   ============================================================ */
+(function(){
+  'use strict';
+
+  var STORE_KEY = 'routineOptimizer.v1';
+
+  // Cores por tipo (espelham as variáveis CSS)
+  var TYPE_COLOR = {
+    trabalho:'var(--trabalho)', saude:'var(--saude)', pessoal:'var(--pessoal)',
+    deslocamento:'var(--deslocamento)', sono:'var(--sono)'
+  };
+  var TYPE_LABEL = {
+    trabalho:'Trabalho', saude:'Saúde', pessoal:'Pessoal',
+    deslocamento:'Deslocamento', sono:'Sono'
+  };
+
+  // Estado em memória do dia atual
+  var eventos = [];
+
+  /* ---------- utilidades de tempo ---------- */
+  function toMin(hhmm){ var p = hhmm.split(':'); return (+p[0])*60 + (+p[1]); }
+  function toHHMM(min){
+    min = ((min % 1440) + 1440) % 1440;
+    var h = Math.floor(min/60), m = min%60;
+    return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+  }
+  // duração tratando eventos que cruzam a meia-noite (ex: sono 22:30 -> 05:30)
+  function dur(start, end){
+    var d = toMin(end) - toMin(start);
+    if(d <= 0) d += 1440;
+    return d;
+  }
+  function fmtDur(min){
+    var h = Math.floor(min/60), m = min%60;
+    if(h && m) return h+'h'+String(m).padStart(2,'0');
+    if(h) return h+'h';
+    return m+'min';
+  }
+
+  /* ---------- persistência ---------- */
+  function loadStore(){
+    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }
+    catch(e){ return {}; }
+  }
+  function saveStore(store){
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); return true; }
+    catch(e){ return false; }
+  }
+
+  /* ---------- DOM refs ---------- */
+  var $ = function(id){ return document.getElementById(id); };
+  var dateInput = $('dateInput'), wakeInput = $('wakeInput');
+  var evtList = $('evtList'), timeline = $('timeline'), result = $('result');
+
+  /* ---------- toast ---------- */
+  var toastTimer;
+  function toast(msg){
+    var t = $('toast');
+    t.innerHTML = '<svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>' + msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+  }
+
+  /* ============================================================
+     RENDER: lista de eventos
+     ============================================================ */
+  function renderEventos(){
+    if(!eventos.length){
+      evtList.innerHTML = '<div class="empty">Nenhuma atividade ainda. Adicione a primeira acima.</div>';
+      renderTimeline();
+      return;
+    }
+    // ordena por horário de início
+    var ordered = eventos.slice().sort(function(a,b){ return toMin(a.start) - toMin(b.start); });
+    evtList.innerHTML = ordered.map(function(ev){
+      return '<div class="evt" style="--c:'+TYPE_COLOR[ev.type]+'">' +
+        '<span class="dot"></span>' +
+        '<div class="info">' +
+          '<div class="n">'+escapeHtml(ev.name)+'</div>' +
+          '<div class="t">'+ev.start+' – '+ev.end+' · '+fmtDur(dur(ev.start,ev.end))+' · '+TYPE_LABEL[ev.type]+'</div>' +
+        '</div>' +
+        '<span class="prio prio-'+ev.prio+'">'+ev.prio+'</span>' +
+        '<button class="del" data-id="'+ev.id+'" aria-label="Remover">' +
+          '<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>' +
+        '</button>' +
+      '</div>';
+    }).join('');
+    // liga remoção
+    evtList.querySelectorAll('.del').forEach(function(b){
+      b.addEventListener('click', function(){
+        eventos = eventos.filter(function(e){ return e.id !== b.dataset.id; });
+        renderEventos();
+      });
+    });
+    renderTimeline();
+  }
+
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  /* ============================================================
+     RENDER: timeline visual (blocos + lacunas)
+     ============================================================ */
+  function renderTimeline(){
+    if(!eventos.length){
+      timeline.innerHTML = '<div class="empty">A timeline aparece quando você adiciona atividades.</div>';
+      return;
+    }
+    var ordered = eventos.slice().sort(function(a,b){ return toMin(a.start) - toMin(b.start); });
+    var rows = '';
+    var prevEnd = null;
+    ordered.forEach(function(ev){
+      var s = toMin(ev.start);
+      // lacuna livre entre eventos (só no mesmo dia, ignora blocos que cruzam meia-noite)
+      if(prevEnd !== null && s > prevEnd){
+        var gap = s - prevEnd;
+        rows += '<div class="tl-row"><span class="tl-time">'+toHHMM(prevEnd)+'</span>' +
+                '<div class="tl-gap">Livre · '+fmtDur(gap)+'</div></div>';
+      }
+      rows += '<div class="tl-row"><span class="tl-time">'+ev.start+'</span>' +
+              '<div class="tl-block" style="--c:'+TYPE_COLOR[ev.type]+'">' +
+                '<span>'+escapeHtml(ev.name)+'</span>' +
+                '<span class="dur">'+fmtDur(dur(ev.start,ev.end))+'</span>' +
+              '</div></div>';
+      prevEnd = toMin(ev.end);
+      if(prevEnd < s) prevEnd += 1440; // cruzou meia-noite
+    });
+    timeline.innerHTML = rows;
+  }
+
+  /* ============================================================
+     ANÁLISE DO DIA — o cérebro do app
+     ============================================================ */
+  function analyze(){
+    if(!eventos.length){ toast('Adiciona pelo menos uma atividadezinha primeiro \u{1F49B}'); return; }
+
+    var wake = wakeInput.value || '05:30';
+    var wakeMin = toMin(wake);
+    var ordered = eventos.slice().sort(function(a,b){ return toMin(a.start) - toMin(b.start); });
+
+    var recs = [];      // {level, text} — level: crit | warn | ok | info
+    var problemas = 0;  // pesa o score
+
+    /* --- 1. Conflitos de horário (sobreposição) --- */
+    for(var i=0;i<ordered.length-1;i++){
+      var a = ordered[i], b = ordered[i+1];
+      var aEnd = toMin(a.end); if(aEnd <= toMin(a.start)) aEnd += 1440;
+      if(toMin(b.start) < aEnd){
+        recs.push({level:'crit', text:'Conflito de horário: "'+a.name+'" e "'+b.name+'" se sobrepõem. Ajuste um dos dois.'});
+        problemas += 2;
+      }
+    }
+
+    /* --- 2. Projeção de sono --- */
+    // último evento não-sono do dia define quando a pessoa fica livre
+    var lastNonSleepEnd = 0;
+    ordered.forEach(function(ev){
+      if(ev.type !== 'sono'){
+        var e = toMin(ev.end); if(e <= toMin(ev.start)) e += 1440;
+        if(e > lastNonSleepEnd) lastNonSleepEnd = e;
+      }
+    });
+    // hora ideal de dormir = acordar - 7h (buffer de 20min pra desacelerar)
+    var idealSleep = ((wakeMin - 7*60) + 1440) % 1440;      // ex: 05:30 - 7h = 22:30
+    var latestBed = ((wakeMin - 7*60) + 1440) % 1440;
+    var actualBed = lastNonSleepEnd % 1440;                  // quando termina a última atividade
+    // horas de sono se dormir logo após a última atividade + 20min de buffer
+    var bedWithBuffer = (actualBed + 20) % 1440;
+    var sleepHours = ((wakeMin - bedWithBuffer) + 1440) % 1440 / 60;
+
+    var mSleepTxt;
+    if(sleepHours >= 7){
+      mSleepTxt = sleepHours.toFixed(1).replace('.0','')+'h';
+      recs.push({level:'ok', text:'Seu horário ideal pra deitar é '+toHHMM(latestBed)+' e completar 7h de soninho. Se cuida! \u{1F49B}'});
+    } else {
+      mSleepTxt = sleepHours.toFixed(1).replace('.0','')+'h';
+      var deficit = Math.round((7 - sleepHours)*60);
+      problemas += 2;
+      recs.push({level:'warn', text:'Sono projetado de '+mSleepTxt+' (abaixo de 7h). Sua última atividade termina '+toHHMM(actualBed)+'; para dormir às '+toHHMM(latestBed)+', libere cerca de '+deficit+' min mais cedo.'});
+    }
+
+    /* --- 3. Blocos longos sem pausa (>3h) --- */
+    ordered.forEach(function(ev){
+      if(ev.type === 'sono') return;
+      var d = dur(ev.start, ev.end);
+      if(d > 180){
+        problemas += 1;
+        recs.push({level:'warn', text:'"'+ev.name+'" dura '+fmtDur(d)+' sem pausa. Considere dividir em blocos menores com intervalos.'});
+      }
+    });
+
+    /* --- 4. Tarefa longa tarde da noite --- */
+    ordered.forEach(function(ev){
+      if(ev.type === 'sono') return;
+      var s = toMin(ev.start);
+      if(s >= toMin('21:30') && s < toMin('23:59') && dur(ev.start,ev.end) > 45){
+        problemas += 1;
+        recs.push({level:'warn', text:'Você não tem tempo folgado para uma tarefa longa como "'+ev.name+'" após 21:30 sem comprometer o sono.'});
+      }
+    });
+
+    /* --- 5. Cálculo de carga e tempo livre --- */
+    var loadMin = 0;
+    ordered.forEach(function(ev){ if(ev.type !== 'sono') loadMin += dur(ev.start, ev.end); });
+    // janela acordada = 24h - sono
+    var awakeMin = 24*60 - Math.round(sleepHours*60);
+    var freeMin = Math.max(0, awakeMin - loadMin);
+
+    if(loadMin > 14*60){
+      problemas += 1;
+      recs.push({level:'warn', text:'Carga de atividades alta ('+fmtDur(loadMin)+'). Reduza ou realoque tarefas de baixa prioridade.'});
+    }
+
+    /* --- 6. Tempo morto mal distribuído (lacunas grandes) --- */
+    var bigGap = null, prevEnd = null;
+    ordered.forEach(function(ev){
+      var s = toMin(ev.start);
+      if(prevEnd !== null && s - prevEnd > 120){
+        if(!bigGap || (s-prevEnd) > bigGap.size) bigGap = {size:s-prevEnd, at:toHHMM(prevEnd)};
+      }
+      var e = toMin(ev.end); if(e < s) e += 1440;
+      prevEnd = e;
+    });
+    if(bigGap){
+      recs.push({level:'info', text:'Você tem '+fmtDur(bigGap.size)+' livres a partir das '+bigGap.at+'. Encaixe tarefas pessoais ou descanso ativo aqui.'});
+    }
+
+    // recomendação de fechamento sempre útil
+    if(problemas === 0){
+      recs.push({level:'ok', text:'Que diinha equilibrado, Aninha! Segue assim e protege esse seu soninho com carinho. \u{1F49A}'});
+    }
+
+    /* --- 7. Score (0–100) --- */
+    var score = 100;
+    if(sleepHours < 7) score -= Math.min(40, (7 - sleepHours)*18);
+    score -= problemas * 8;
+    score = Math.max(5, Math.min(100, Math.round(score)));
+
+    /* --- render dos resultados --- */
+    renderScore(score, sleepHours);
+    renderMetrics(mSleepTxt, loadMin, freeMin);
+    renderRecs(recs);
+    renderHeat(ordered);
+
+    result.classList.remove('hidden');
+    result.classList.add('fade-in');
+    result.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  /* ---------- render: anel de score ---------- */
+  function renderScore(score, sleepHours){
+    var circ = 2 * Math.PI * 38; // 238.76
+    var arc = $('scoreArc');
+    arc.style.strokeDashoffset = circ - (circ * score/100);
+    $('scoreNum').textContent = score;
+
+    var badge = $('scoreBadge'), desc = $('scoreDesc'), color, label, txt;
+    if(score >= 75){ color='var(--ok)'; label='🟢 Otimizado'; txt='Soninho e carga bem cuidados, Aninha. \u{1F49A}'; badge.className='score-badge badge-ok'; }
+    else if(score >= 50){ color='var(--warn)'; label='🟡 Ajustável'; txt='Uns ajustinhos e seu dia fica redondinho. \u{1F495}'; badge.className='score-badge badge-warn'; }
+    else { color='var(--crit)'; label='🔴 Crítico'; txt='Vamos proteger seu soninho? Dá uma ajustada com carinho. \u{1F49B}'; badge.className='score-badge badge-crit'; }
+    arc.style.stroke = color;
+    badge.textContent = label;
+    desc.textContent = txt;
+  }
+
+  /* ---------- render: métricas ---------- */
+  function renderMetrics(sleepTxt, loadMin, freeMin){
+    $('mSleep').textContent = sleepTxt;
+    $('mLoad').textContent = fmtDur(loadMin);
+    $('mFree').textContent = fmtDur(freeMin);
+  }
+
+  /* ---------- render: recomendações (ordenadas por severidade) ---------- */
+  function renderRecs(recs){
+    var order = {crit:0, warn:1, info:2, ok:3};
+    recs.sort(function(a,b){ return order[a.level] - order[b.level]; });
+    var icon = {
+      crit:'<path d="M12 9v4M12 17h.01M10.3 3.9L2 18a1 1 0 001 1.5h18a1 1 0 001-1.5L13.7 3.9a1 1 0 00-1.7 0z"/>',
+      warn:'<path d="M12 9v4M12 17h.01M10.3 3.9L2 18a1 1 0 001 1.5h18a1 1 0 001-1.5L13.7 3.9a1 1 0 00-1.7 0z"/>',
+      ok:'<path d="M20 6L9 17l-5-5"/>',
+      info:'<path d="M12 16v-4M12 8h.01M12 2a10 10 0 100 20 10 10 0 000-20z"/>'
+    };
+    $('recs').innerHTML = recs.map(function(r){
+      return '<div class="rec rec-'+r.level+'">' +
+        '<span class="ricon"><svg viewBox="0 0 24 24">'+icon[r.level]+'</svg></span>' +
+        '<span class="rtxt">'+r.text+'</span>' +
+      '</div>';
+    }).join('');
+  }
+
+  /* ---------- render: heatmap de ineficiência ---------- */
+  function renderHeat(ordered){
+    var rows = [];
+
+    // maior bloco contínuo sem pausa
+    var longest = 0, longestName = '';
+    ordered.forEach(function(ev){
+      if(ev.type==='sono') return;
+      var d = dur(ev.start, ev.end);
+      if(d > longest){ longest = d; longestName = ev.name; }
+    });
+    var longPct = Math.min(100, Math.round(longest / 300 * 100)); // 5h = 100%
+    rows.push({
+      name:'Blocos longos', level: longest>180?'alto':(longest>120?'medio':'baixo'),
+      pct:Math.max(12,longPct),
+      desc: longest? '"'+longestName+'" é o maior bloco ('+fmtDur(longest)+'). '+(longest>180?'Divida com pausas.':'Dentro do saudável.') : 'Sem blocos longos.'
+    });
+
+    // maior intervalo ocioso
+    var gap=0, gapAt='', prevEnd=null;
+    ordered.forEach(function(ev){
+      var s=toMin(ev.start);
+      if(prevEnd!==null && s-prevEnd>gap){ gap=s-prevEnd; gapAt=toHHMM(prevEnd); }
+      var e=toMin(ev.end); if(e<s)e+=1440; prevEnd=e;
+    });
+    var gapPct = Math.min(100, Math.round(gap/180*100));
+    rows.push({
+      name:'Intervalos ociosos', level: gap>120?'alto':(gap>60?'medio':'baixo'),
+      pct:Math.max(10,gapPct),
+      desc: gap>60? fmtDur(gap)+' parados às '+gapAt+'. Realoque uma tarefa aqui.' : 'Intervalos bem aproveitados.'
+    });
+
+    // pressão sobre o sono (última atividade vs meta de dormir)
+    var wakeMin = toMin(wakeInput.value||'05:30');
+    var latestBed = ((wakeMin-7*60)+1440)%1440;
+    var lastEnd=0;
+    ordered.forEach(function(ev){ if(ev.type!=='sono'){ var e=toMin(ev.end); if(e<=toMin(ev.start))e+=1440; if(e>lastEnd)lastEnd=e; }});
+    var over = (lastEnd%1440) - latestBed;
+    if(over < -720) over += 1440;
+    var sleepPressure = over>0 ? Math.min(100, Math.round(over/120*100)) : 8;
+    rows.push({
+      name:'Pressão sobre o sono', level: over>30?'alto':(over>0?'medio':'baixo'),
+      pct:Math.max(8,sleepPressure),
+      desc: over>0? 'Última atividade passa '+fmtDur(over)+' da hora ideal de dormir ('+toHHMM(latestBed)+').' : 'Você fecha o dia a tempo de dormir.'
+    });
+
+    $('heat').innerHTML = rows.map(function(r){
+      return '<div class="heat-row heat-'+r.level+'">' +
+        '<div class="heat-top"><span class="heat-name">'+r.name+'</span><span class="heat-tag">'+r.level+'</span></div>' +
+        '<div class="heat-bar"><span style="width:0"></span></div>' +
+        '<div class="heat-desc">'+r.desc+'</div>' +
+      '</div>';
+    }).join('');
+    // anima as barras após render
+    requestAnimationFrame(function(){
+      var bars = $('heat').querySelectorAll('.heat-bar span');
+      rows.forEach(function(r,i){ bars[i].style.width = r.pct+'%'; });
+    });
+  }
+
+  /* ============================================================
+     BARRA DE PROGRESSO DO DIA (hora real)
+     ============================================================ */
+  function updateDayBar(){
+    var now = new Date();
+    var pct = Math.round((now.getHours()*60 + now.getMinutes())/1440*100);
+    $('dayBar').style.width = pct + '%';
+  }
+
+  /* ============================================================
+     AÇÕES: adicionar, salvar, carregar
+     ============================================================ */
+  function addEvento(){
+    var name = $('evName').value.trim();
+    var start = $('evStart').value, end = $('evEnd').value;
+    if(!name){ toast('Dá um nominho pra essa atividade, tá? \u{1F49B}'); $('evName').focus(); return; }
+    if(!start || !end){ toast('Defina início e fim'); return; }
+    if(start === end){ toast('Início e fim não podem ser iguais'); return; }
+    eventos.push({
+      id: 'e'+Date.now()+Math.random().toString(36).slice(2,6),
+      name:name, start:start, end:end,
+      type:$('evType').value, prio:$('evPrio').value
+    });
+    $('evName').value = '';
+    renderEventos();
+    toast('Atividadezinha adicionada \u{1F49B}');
+  }
+
+  function saveDay(){
+    var date = dateInput.value;
+    if(!date){ toast('Escolha uma data'); return; }
+    var store = loadStore();
+    store[date] = { wake: wakeInput.value, eventos: eventos };
+    if(saveStore(store)) toast('Seu diinha foi guardado com carinho \u{1F495}');
+    else toast('Não foi possível salvar');
+  }
+
+  function loadDay(){
+    var date = dateInput.value;
+    if(!date){ toast('Escolha uma data'); return; }
+    var store = loadStore();
+    var day = store[date];
+    if(day){
+      eventos = (day.eventos || []).slice();
+      wakeInput.value = day.wake || '05:30';
+      renderEventos();
+      result.classList.add('hidden');
+      toast(eventos.length + ' atividadezinha(s) carregada(s) \u{1F49C}');
+    } else {
+      eventos = [];
+      renderEventos();
+      result.classList.add('hidden');
+      toast('Nenhum dado salvo para este dia');
+    }
+  }
+
+  /* ============================================================
+     INIT
+     ============================================================ */
+  function init(){
+    // data default = hoje (fuso local)
+    var t = new Date();
+    var today = t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+    dateInput.value = today;
+
+    // auto-carrega o dia de hoje se existir
+    var store = loadStore();
+    if(store[today]){
+      eventos = (store[today].eventos||[]).slice();
+      wakeInput.value = store[today].wake || '05:30';
+    }
+    renderEventos();
+    updateDayBar();
+    setInterval(updateDayBar, 60000);
+
+    // listeners
+    $('addBtn').addEventListener('click', addEvento);
+    $('saveBtn').addEventListener('click', saveDay);
+    $('loadBtn').addEventListener('click', loadDay);
+    $('analyzeBtn').addEventListener('click', analyze);
+    $('evName').addEventListener('keydown', function(e){ if(e.key==='Enter') addEvento(); });
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+})();
+</script>
+</body>
+</html>
